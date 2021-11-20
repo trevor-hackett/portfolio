@@ -20,13 +20,13 @@ This tutorial will guide you through the process of creating your own custom Rea
 This component library will be written in TypeScript, built using Rollup, and published to npm. At the end of this tutorial, you'll be able to install your libary like this:
 
 ```bash
-npm install @your-organization/component-library
+npm install @your-username/component-library
 ```
 
 And use it like this:
 
-```jsx
-import { Button } from '@your-organization/component-library'
+```jsx showLineNumbers
+import { Button } from '@your-username/component-library'
 
 function App() {
   return <Button>My custom button!</Button>
@@ -94,7 +94,7 @@ Double check your file structure. There should be 3 `index.ts` files and 1 `Butt
 
 Let's edit the `Button.tsx` component:
 
-```tsx:src/components/Button/Button.tsx
+```tsx:src/components/Button/Button.tsx showLineNumbers
 export interface ButtonProps {
   label: string
 }
@@ -110,15 +110,15 @@ We'll keep the component simple. This component will accept a label as a propert
 
 Now let's expose our `Button` component. We'll need to export it all the way up to the `src/index.ts` file:
 
-```jsx:src/components/Button/index.ts
+```jsx:src/components/Button/index.ts showLineNumbers
 export { default } from './Button'
 ```
 
-```jsx:src/components/index.ts
+```jsx:src/components/index.ts showLineNumbers
 export { default as Button } from './Button'
 ```
 
-```jsx:src/index.ts
+```jsx:src/index.ts showLineNumbers
 export * from './components'
 ```
 
@@ -145,7 +145,7 @@ Now I'll configure typescript:
 
 You'll notice that as soon as we created the configuration, we start getting TypeScript errors in our `Button.tsx` file. This is because TypeScript doesn't understand React by default. Let's update our `tsconfig.json` file with the following:
 
-```json:tsconfig.json
+```json:tsconfig.json {11-21} showLineNumbers
 {
   "compilerOptions": {
     // Defaults
@@ -188,7 +188,7 @@ npm i -D rollup @rollup/plugin-commonjs @rollup/plugin-node-resolve rollup-plugi
 
 To configure how rollup is going to bundle our library, we need to create a configuration file in the root of our project:
 
-```js:rollup.config.js
+```js:rollup.config.js showLineNumbers
 import peerDepsExternal from "rollup-plugin-peer-deps-external";
 import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
@@ -223,7 +223,7 @@ Here we import our plugins and import the `package.json` file. We need this to r
 
 The final step is to edit the update our `package.json` file:
 
-```json:package.json
+```json:package.json {6-8, 21-29} showLineNumbers
 {
   "name": "component-library",
   "version": "0.0.1",
@@ -326,6 +326,7 @@ You now need to update your `package.json` file:
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/YOUR_GITHUB_USERNAME"
   }
+  // ...
 }
 ```
 
@@ -339,6 +340,7 @@ Here's what mine looks like:
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/yarrgh"
   }
+  // ...
 }
 ```
 
@@ -432,7 +434,7 @@ npm install @yarrgh/component-library
 
 Now let's use our library. Let's open up the `App.tsx` file and start using our library:
 
-```tsx:App.tsx
+```tsx:App.tsx showLineNumbers
 import { Button } from '@yarrgh/component-library'
 
 function App() {
