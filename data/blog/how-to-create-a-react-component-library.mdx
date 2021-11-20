@@ -1,0 +1,462 @@
+---
+title: How to Create a React Component Library
+date: '2021-11-18'
+tags: ['react', 'component library', 'TypeScript', 'Rollup']
+summary: Just Testing
+images: []
+draft: false
+layout: PostLayout
+authors: ['default']
+---
+
+All code from this tutorial is available in [this repository](https://github.com).
+
+<TOCInline toc={props.toc} toHeading={2} asDisclosure />
+
+## Introduction
+
+This tutorial will guide you through the process of creating your own custom React component library.
+
+This component library will be written in TypeScript, built using Rollup, and published to npm. At the end of this tutorial, you'll be able to install your libary like this:
+
+```bash
+npm install @your-organization/component-library
+```
+
+And use it like this:
+
+```jsx
+import { Button } from '@your-organization/component-library'
+
+function App() {
+  return <Button>My custom button!</Button>
+}
+
+export default App
+```
+
+## Prerequisites
+
+I'm going to assume that you are already familiar with and have the installed:
+
+- A code editor or IDE (I'll be using [Visual Studio Code](https://code.visualstudio.com))
+- [NodeJS](https://nodejs.org) and NPM (NPM is installed with NodeJS)
+- Managing NPM packages
+- Terminal of your choice (Bash, PowerShell, Command Prompt, etc)
+- Git / [Github](https://github.com)
+- React (creating components, hooks, etc)
+- TypeScript
+
+## Setting Up the Project
+
+Let's start off by opening a terminal and creating a directory moving into that directory:
+
+```bash
+mkdir component-library
+cd component-library
+```
+
+Now let's initialize our npm project:
+
+```bash
+npm init -y
+```
+
+The first command will create a new npm project with all default options. We'll edit the defaults later.
+
+The second command will create a `tsconfig.json` file with the
+
+Next, let's install install React:
+
+```bash
+npm i -D react
+```
+
+## Creating Your First Component
+
+Because we're creating a library, we should make it as easy as possible for users of our libary to import what they want. To do this, we will use `index.ts` files to export our components.
+
+In the root of the project, create the following files and directories:
+
+```text:./component-library/
+├─ src
+|  ├─ components
+|  |  ├─ Button
+|  |  |  ├─ Button.tsx
+|  |  |  └─ index.ts
+|  |  └─ index.ts
+|  └─ index.ts
+├─ package.json
+└─ package-lock.json
+```
+
+Double check your file structure. There should be 3 `index.ts` files and 1 `Button.tsx` file.
+
+Let's edit the `Button.tsx` component:
+
+```tsx:src/components/Button/Button.tsx
+export interface ButtonProps {
+  label: string
+}
+
+const Button = ({ label }: ButtonProps) => {
+  return <button>{label}</button>
+}
+
+export default Button
+```
+
+We'll keep the component simple. This component will accept a label as a property and display it inside of a button.
+
+Now let's expose our `Button` component. We'll need to export it all the way up to the `src/index.ts` file:
+
+```jsx:src/components/Button/index.ts
+export { default } from './Button'
+```
+
+```jsx:src/components/index.ts
+export { default as Button } from './Button'
+```
+
+```jsx:src/index.ts
+export * from './components'
+```
+
+That last export will expose all of our components at once.
+
+## Adding and Configuring TypeScript
+
+Up until now, we haven't installed or configured TypeScript. Let's do that now:
+
+```bash
+npm i -D typescript @types/react
+```
+
+You technically don't need a configuration file to use TypeScript. Building a library has its complexities and we're going to want one.
+
+You can create a default configuration file by running the following command:
+
+```bash
+npx tsc --init
+```
+
+This will create a `tsconfig.json` file with some default options. You can find the full documentation [here](https://www.typescriptlang.org/docs/handbook/tsconfig-json.html).
+Now I'll configure typescript:
+
+You'll notice that as soon as we created the configuration, we start getting TypeScript errors in our `Button.tsx` file. This is because TypeScript doesn't understand React by default. Let's update our `tsconfig.json` file with the following:
+
+```json:tsconfig.json
+{
+  "compilerOptions": {
+    // Defaults
+    "target": "es5",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+
+    // Added/Updated
+    "jsx": "react-jsx",
+    "module": "esnext",
+    "declarationDir": "dist",
+    "declaration": true,
+    "sourceMap": true,
+    "outDir": "dist",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}
+```
+
+The first section should already be set by default. The rest will need to be added or updated. Alternatively, you can just replace your `tsconfig.json` file with the code above.
+
+This configures TypeScript to work with React and also tells TypeScript where to put the declaration files (`.d.ts`).
+
+After adding the configuration, all TypeScript errors should now be resolved.
+
+## Adding Rollup
+
+Rollup is a javscript bundler similar to webpack. It has a plugin ecosystem that allows you to adapt rollup to your project.
+
+Let's install rollup and a few plugins:
+
+```bash
+npm i -D rollup @rollup/plugin-commonjs @rollup/plugin-node-resolve rollup-plugin-peer-deps-external rollup-plugin-typescript2
+```
+
+To configure how rollup is going to bundle our library, we need to create a configuration file in the root of our project:
+
+```js:rollup.config.js
+import peerDepsExternal from "rollup-plugin-peer-deps-external";
+import resolve from "@rollup/plugin-node-resolve";
+import commonjs from "@rollup/plugin-commonjs";
+import typescript from "rollup-plugin-typescript2";
+
+const packageJson = require("./package.json");
+
+export default {
+  input: "src/index.ts",
+  output: [
+    {
+      file: packageJson.main,
+      format: "cjs",
+      sourcemap: true,
+    },
+    {
+      file: packageJson.module,
+      format: "esm",
+      sourcemap: true,
+    },
+  ],
+  plugins: [
+    peerDepsExternal(),
+    resolve(),
+    commonjs(),
+    typescript({ useTsconfigDeclarationDir: true })
+  ],
+};
+```
+
+Here we import our plugins and import the `package.json` file. We need this to refer to the `main` and `module` sections of the `package.json` file. We will configure these sections next. We will be distributing our library as ES6 and commonJS modules so consumers of our library can choose which type works best for them. Next we invoke our plugins.
+
+The final step is to edit the update our `package.json` file:
+
+```json:package.json
+{
+  "name": "component-library",
+  "version": "0.0.1",
+  "description": "A simple react componentt library",
+  "keywords": [],
+  "scripts": {
+    "build": "rollup -c"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^21.0.1",
+    "@rollup/plugin-node-resolve": "^13.0.6",
+    "@types/react": "^17.0.35",
+    "react": "^17.0.2",
+    "rollup": "^2.60.0",
+    "rollup-plugin-peer-deps-external": "^2.2.4",
+    "rollup-plugin-typescript2": "^0.31.0",
+    "typescript": "^4.5.2"
+  },
+  "peerDependencies": {
+    "react": "^17.0.2"
+  },
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "files": [
+    "dist"
+  ],
+  "types": "dist/index.d.ts"
+}
+```
+
+The most important changes are:
+
+- `peerDependencies` -- set react as a peer dependency so it doesn't get bundled with our library
+- `main` -- path to our commonjs modules
+- `module` -- path to our ES6 modules
+- `files` -- the files to include in our npm package
+- `types` -- path to your TypeScript declarations
+- `scripts` -- scripts that can be run by npm. The `build` script will invoke Rollup and build our library.
+
+## Building Your Library
+
+Now that everything is in place, we are now ready to run rollup for the first time. Run the following command:
+
+```bash
+npm run build
+```
+
+If everything was configured correctly, Rollup will run without error and you'll see a `dist` directory in the root of your project.
+
+<figure>
+  ![dist folder files](/static/images/component-library/dist-files.png)
+  <figcaption>
+    If you see any errors, make sure to read closely and try to identify the issue. Double check
+    that all of your files/directories follows the file structure and code examples. Depending on
+    the length of times since this post was published, libraries could have been updated with
+    breaking changes. All libraries and their versions are listed in the `package.json` file above.
+    You may need to use these exact versions to get the code to work.
+  </figcaption>
+</figure>
+
+## Publishing Your Library
+
+We've created a component library! Now we need to publish it.
+
+Log into Github and create a new empty repository. You can call it whatever you want. I'm calling mine `component-library`. Your repository can be public or private.
+
+Once the repository is created, we need to initialize git:
+
+```bash
+git init -b main
+```
+
+Next create a `.gitignore` file in the root of the project.
+
+```text:.gitignore
+dist
+node_modules
+```
+
+This will exclude the `node_modules` and `dist` directories. These are auto-generated files and should not be included in the repository.
+
+Now follow the instructions on Github to add existing code to your repository. The following commands can be used as a reference:
+
+```bash
+git remote add origin git@github.com:your-username/component-library.git
+git add .
+git commit -m "initial commit"
+git push origin main
+```
+
+Your library is now pushed to your Github repository. We are not done, however. We still need to publish our package.
+
+You now need to update your `package.json` file:
+
+```json:package.json
+{
+  "name": "@YOUR_GITHUB_USERNAME/YOUR_REPOSITORY_NAME",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/YOUR_GITHUB_USERNAME"
+  }
+}
+```
+
+Replace that code with your github username and repository name.
+
+Here's what mine looks like:
+
+```json:package.json
+{
+  "name": "@yarrgh/component-library",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/yarrgh"
+  }
+}
+```
+
+**Important:** Make sure to include the '@' symbol in the name but not in the registry
+
+Now that we have configured our `package.json` with our package information, we need to configure our local install of NPM to to authorized to publish to your Github account. We need to create a `.npmrc` file.
+
+This file is **NOT PART OF YOUR PROJECT**. This is a global file located in a central location.
+
+For Mac/Linux: it's located at `~/.npmrc`.
+
+For Windows: it's located at `C:\Users\{YOUR_WINDOWS USERNAME}\.npmrc`.
+
+Create the file if it doesn't exist and include the following information:
+
+```text:~/.npmrc
+registry=https://registry.npmjs.org/
+@YOUR_GITHUB_USERNAME:registry=https://npm.pkg.github.com/
+//npm.pkg.github.com/:_authToken=YOUR_AUTH_TOKEN
+```
+
+Replace `YOUR_GITHUB_USERNAME` with your username. Make sure to include the leading '@' symbol.
+
+The `YOUR_AUTH_TOKEN` needs to be replaced by your authorization token. Let's head back to Github.
+
+Go to your Github profile: Settings -> Developer Settings -> Personal Access Tokens. Or just click [this link](https://github.com/settings/tokens).
+
+Click "Generate new token".
+
+Give it a name/note. Give it an expiry date. Give it the `write:packages` access value. This will give your token permission to read & write packages to your Github account.
+
+![dist folder files](/static/images/component-library/github-pat.png)
+
+When you're done, click "Generate token"
+
+Copy the token. This is only shown once. Keep it in a safe location. If you lose it, you'll have to generate a new token.
+
+Now go back to your `.npmrc` file and replace the `YOUR_AUTH_TOKEN` with the token from Github.
+
+Your `.npmrc` file should look similar to this:
+
+```text:~/.npmrc
+registry=https://registry.npmjs.org/
+@yarrgh:registry=https://npm.pkg.github.com/
+//npm.pkg.github.com/:_authToken=ghp_CXBZ9kW932tOnslflW3kSR3kbD3e0kR4
+```
+
+Now, in the root of your project, run the following command to publish your package:
+
+```bash
+npm publish
+```
+
+_If you are prompted for a username/password, the username is your Github username and the password is your Github token_
+
+Congratulations! You have now published version 0.0.1 of your React component library! You can view the package by goin to your repository and clicking on your package name in the "Packages" section.
+
+![dist folder files](/static/images/component-library/github-packages.png)
+
+## Using Your Library
+
+Your package is now live, let's use it!
+
+Using your library is slightly different than using a normal npm package. Only those who are authorized can download and install your library. Your users will also need a `.npmrc` file. However, you can provide them with an token that has read access.
+
+You can generate a new personal access token with the `read:packages` (not write) scope. Once generated, you can share that token with those that need to consume your library.
+
+From here, we'll assume that your library consumers have set up their `.npmrc` file accordingly.
+
+Let's create a new React app and install our library.
+
+In a new directory, run this command:
+
+```bash
+npm init vite@latest
+```
+
+Follow the prompts. Give it a name. When you're done. Open the new directory containing the React application.
+
+Install your library:
+
+```bash
+npm install @YOUR_GITHUB_USERNAME/YOUR_REPOSITORY_NAME
+```
+
+My command would look like this:
+
+```bash
+npm install @yarrgh/component-library
+```
+
+Now let's use our library. Let's open up the `App.tsx` file and start using our library:
+
+```tsx:App.tsx
+import { Button } from '@yarrgh/component-library'
+
+function App() {
+
+  return (
+    <Button label="Hello from our library" />
+  )
+}
+
+export default App
+```
+
+Run the app and you should see our component being rendered!
+
+![dist folder files](/static/images/component-library/library-output.png)
+
+## Conclusion
+
+That's it! You have now created your own component library.
+
+You've gone from nothing to having to creating a React component library with TypeScript, bundling it with Rollup, hosting it on your own Github repository, and finally publishing it as a NPM package on your repository's packages. You've also learned how to consume your new component library in a real React application.
+
+In the next post you will learn the following:
+
+- CSS for styling our library components
+- Storybook for testing our components in isolation (plus easy documentation)
+- Testing our components with React Testing Library & Jest.
