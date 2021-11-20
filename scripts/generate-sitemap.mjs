@@ -1,8 +1,10 @@
-const fs = require('fs')
-const globby = require('globby')
-const prettier = require('prettier')
-const siteMetadata = require('../data/siteMetadata')
-
+import { globby } from 'globby'
+import fs from 'fs'
+import prettier from 'prettier'
+import siteMetadata from '../data/siteMetadata.mjs'
+// const globby = require('globby')
+// const prettier = require('prettier')
+// const siteMetadata = require('../data/siteMetadata')
 ;(async () => {
   const prettierConfig = await prettier.resolveConfig('./.prettierrc.js')
   const pages = await globby([

@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 
+// eslint-disable-next-line prettier/prettier
 const pipe = (...fns) => (x) => fns.reduce((v, f) => f(v), x)
 
 const flattenArray = (input) =>
