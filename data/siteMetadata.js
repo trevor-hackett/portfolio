@@ -1,7 +1,7 @@
-export const siteMetadata = {
-  title: 'Next.js Starter Blog',
+const siteMetadata = {
+  title: 'Hackett Blog',
   author: 'Trevor Hackett',
-  headerTitle: 'Trevor Hackett',
+  headerTitle: 'Hackett Blog',
   description: 'A blog created with Next.js and Tailwind.css',
   language: 'en-us',
   siteUrl: 'https://hacketts.dev',
@@ -9,7 +9,7 @@ export const siteMetadata = {
   siteLogo: '/static/images/logo.png',
   image: '/static/images/avatar.png',
   socialBanner: '/static/images/twitter-card.png',
-  // email: '',
+  // email: 'address@yoursite.com',
   github: 'https://github.com/yarrgh',
   twitter: 'https://twitter.com/fate900',
   // facebook: 'https://facebook.com',
@@ -25,6 +25,7 @@ export const siteMetadata = {
   newsletter: {
     // supports mailchimp, buttondown, convertkit
     // Please add your .env file and modify it according to your selection
+    // provider: 'buttondown',
     provider: '',
   },
   comment: {
@@ -71,5 +72,4 @@ export const siteMetadata = {
   },
 }
 
-// module.exports = siteMetadata
-export default siteMetadata
+module.exports = siteMetadata

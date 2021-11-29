@@ -2,7 +2,7 @@
 name: Trevor Hackett
 avatar: /static/images/avatar.png
 occupation: Application Architect
-company: Stanford University
+email: trevorhackett@gmail.com
 twitter: https://twitter.com/fate900
 linkedin: https://www.linkedin.com/in/trevorhackett
 github: https://github.com/yarrgh
