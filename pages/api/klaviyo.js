@@ -1,4 +1,4 @@
-export default async (req, res) => {
+const klaviyo = async (req, res) => {
   const { email } = req.body
   if (!email) {
     return res.status(400).json({ error: 'Email is required' })
@@ -32,3 +32,5 @@ export default async (req, res) => {
     return res.status(500).json({ error: error.message || error.toString() })
   }
 }
+
+export default klaviyo
