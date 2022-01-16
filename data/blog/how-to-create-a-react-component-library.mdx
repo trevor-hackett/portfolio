@@ -1,7 +1,7 @@
 ---
 title: How to Create a React Component Library
 date: '2021-11-18'
-tags: ['react', 'component library', 'TypeScript', 'Rollup']
+tags: ['react', 'component library', 'TypeScript', 'esbuild']
 summary: Let's create a React component library from scratch to published NPM package
 images: []
 draft: false
@@ -17,7 +17,7 @@ All code from this tutorial is available in [this repository](https://github.com
 
 This tutorial will guide you through the process of creating your own custom React component library.
 
-This component library will be written in TypeScript, built using Rollup, and published to npm. At the end of this tutorial, you'll be able to install your libary like this:
+This component library will be written in TypeScript, built using esbuild, and published as a Github package. At the end of this tutorial, you'll be able to install your libary like this:
 
 ```bash
 npm install @your-username/component-library
@@ -72,7 +72,7 @@ Next, let's install install React:
 npm i -D react
 ```
 
-## Creating Your First Component
+## Creating the First Component
 
 Because we're creating a library, we should make it as easy as possible for users of our libary to import what they want. To do this, we will use `index.ts` files to export our components.
 
@@ -143,19 +143,16 @@ npx tsc --init
 This will create a `tsconfig.json` file with some default options. You can find the full documentation [here](https://www.typescriptlang.org/docs/handbook/tsconfig-json.html).
 Now I'll configure typescript:
 
-You'll notice that as soon as we created the configuration, we start getting TypeScript errors in our `Button.tsx` file. This is because TypeScript doesn't understand React by default. Let's update our `tsconfig.json` file with the following:
+You'll notice that as soon as we created the configuration, we start getting TypeScript errors in our `Button.tsx` file. This is because TypeScript doesn't understand React by default. Let's update our `tsconfig.json` file to match the following:
 
-```json:tsconfig.json {11-21} showLineNumbers
+```json:tsconfig.json showLineNumbers
 {
   "compilerOptions": {
-    // Defaults
-    "target": "es5",
+    "target": "esnest",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
-
-    // Added/Updated
     "jsx": "react-jsx",
     "module": "esnext",
     "declarationDir": "dist",
@@ -170,79 +167,75 @@ You'll notice that as soon as we created the configuration, we start getting Typ
 }
 ```
 
-The first section should already be set by default. The rest will need to be added or updated. Alternatively, you can just replace your `tsconfig.json` file with the code above.
+You find and replace the values or you can just replace your `tsconfig.json` file with the code above.
 
 This configures TypeScript to work with React and also tells TypeScript where to put the declaration files (`.d.ts`).
 
 After adding the configuration, all TypeScript errors should now be resolved.
 
-## Adding Rollup
+## Adding esbuild
 
-Rollup is a javscript bundler similar to webpack. It has a plugin ecosystem that allows you to adapt rollup to your project.
+`esbuild` is a javscript bundler similar to webpack and `rimraf` will be used to clean our `dist` folder. We'll also be installing `esbuild-node-externals` to make sure we don't bundle any of our dependencies with our library.
 
-Let's install rollup and a few plugins:
+Let's install esbuild and rimraf:
 
 ```bash
-npm i -D rollup @rollup/plugin-commonjs @rollup/plugin-node-resolve rollup-plugin-peer-deps-external rollup-plugin-typescript2
+npm i -D esbuild esbuild-node-externals rimraf
 ```
 
-To configure how rollup is going to bundle our library, we need to create a configuration file in the root of our project:
+We'll use esbuild using a script file. Create a `esbuild.mjs` file in the root of our project:
 
-```js:rollup.config.js showLineNumbers
-import peerDepsExternal from "rollup-plugin-peer-deps-external";
-import resolve from "@rollup/plugin-node-resolve";
-import commonjs from "@rollup/plugin-commonjs";
-import typescript from "rollup-plugin-typescript2";
+```js:esbuild.mjs showLineNumbers
+import esbuild from 'esbuild'
+import { nodeExternalsPlugin } from 'esbuild-node-externals'
 
-const packageJson = require("./package.json");
+esbuild.build({
+  entryPoints: ['src/index.ts'],
+  outdir: 'dist/esm',
+  bundle: true,
+  sourcemap: true,
+  minify: true,
+  splitting: true,
+  format: 'esm',
+  target: 'esnext',
+  plugins: [nodeExternalsPlugin()],
+})
 
-export default {
-  input: "src/index.ts",
-  output: [
-    {
-      file: packageJson.main,
-      format: "cjs",
-      sourcemap: true,
-    },
-    {
-      file: packageJson.module,
-      format: "esm",
-      sourcemap: true,
-    },
-  ],
-  plugins: [
-    peerDepsExternal(),
-    resolve(),
-    commonjs(),
-    typescript({ useTsconfigDeclarationDir: true })
-  ],
-};
+esbuild.build({
+  entryPoints: ['src/index.ts'],
+  outdir: 'dist/cjs',
+  bundle: true,
+  sourcemap: true,
+  minify: true,
+  format: 'cjs',
+  target: 'esnext',
+  plugins: [nodeExternalsPlugin()],
+})
+
 ```
 
-Here we import our plugins and import the `package.json` file. We need this to refer to the `main` and `module` sections of the `package.json` file. We will configure these sections next. We will be distributing our library as ES6 and commonJS modules so consumers of our library can choose which type works best for them. Next we invoke our plugins.
+Pretty simple. We set up two builds. One for ECMAScript modules and one for commonjs modules. We need this to refer to the `main` and `module` sections of the `package.json` file.
 
 The final step is to edit the update our `package.json` file:
 
-```json:package.json {6-8, 21-29} showLineNumbers
+```json:package.json {6-9, 19-27} showLineNumbers
 {
   "name": "component-library",
   "version": "0.0.1",
   "description": "A simple react componentt library",
   "keywords": [],
   "scripts": {
-    "build": "rollup -c"
+    "ts-types": "tsc --emitDeclarationOnly --outDir dist",
+    "build": "rimraf dist && node ./esbuild.mjs && npm run ts-types"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^21.0.1",
-    "@rollup/plugin-node-resolve": "^13.0.6",
-    "@types/react": "^17.0.35",
+    "@types/react": "^17.0.38",
+    "esbuild": "^0.14.11",
     "react": "^17.0.2",
-    "rollup": "^2.60.0",
-    "rollup-plugin-peer-deps-external": "^2.2.4",
-    "rollup-plugin-typescript2": "^0.31.0",
-    "typescript": "^4.5.2"
+    "rimraf": "^3.0.2",
+    "typescript": "^4.5.4"
   },
   "peerDependencies": {
     "react": "^17.0.2"
@@ -259,34 +252,34 @@ The final step is to edit the update our `package.json` file:
 The most important changes are:
 
 - `peerDependencies` -- set react as a peer dependency so it doesn't get bundled with our library
-- `main` -- path to our commonjs modules
-- `module` -- path to our ES6 modules
+- `main` -- path to our commonjs files
+- `module` -- path to our ESM files
 - `files` -- the files to include in our npm package
-- `types` -- path to your TypeScript declarations
-- `scripts` -- scripts that can be run by npm. The `build` script will invoke Rollup and build our library.
+- `types` -- path to our TypeScript declarations
+- `scripts` -- scripts that can be run by npm. The `build` script will clean the `dist` folder and build our library.
 
-## Building Your Library
+## Building the Library
 
-Now that everything is in place, we are now ready to run rollup for the first time. Run the following command:
+Now that everything is in place, we are now ready to run esbuild for the first time. Run the following command:
 
 ```bash
 npm run build
 ```
 
-If everything was configured correctly, Rollup will run without error and you'll see a `dist` directory in the root of your project.
+If everything was configured correctly, esbuild will run without error and you'll see a `dist` directory in the root of your project.
 
 <figure>
   ![dist folder files](/static/images/component-library/dist-files.png)
   <figcaption>
     If you see any errors, make sure to read closely and try to identify the issue. Double check
-    that all of your files/directories follows the file structure and code examples. Depending on
-    the length of times since this post was published, libraries could have been updated with
-    breaking changes. All libraries and their versions are listed in the `package.json` file above.
-    You may need to use these exact versions to get the code to work.
+    that all of your files/directories follows the file structure and code examples. The npm
+    packages could have been updated with breaking since publishing thos post. All libraries and
+    their versions are listed in the `package.json` file above. You may need to use these exact
+    versions to get the code to work.
   </figcaption>
 </figure>
 
-## Publishing Your Library
+## Publishing the Library
 
 We've created a component library! Now we need to publish it.
 
@@ -400,11 +393,11 @@ Congratulations! You have now published version 0.0.1 of your React component li
 
 ![dist folder files](/static/images/component-library/github-packages.png)
 
-## Using Your Library
+## Using the Library
 
-Your package is now live, let's use it!
+Our package is now live, let's use it!
 
-Using your library is slightly different than using a normal npm package. Only those who are authorized can download and install your library. Your users will also need a `.npmrc` file. However, you can provide them with an token that has read access.
+Using our library is slightly different than using a normal npm package. Only those who are authorized can download and install your library. Your users will also need a `.npmrc` file. However, you can provide them with an token that has read access.
 
 You can generate a new personal access token with the `read:packages` (not write) scope. Once generated, you can share that token with those that need to consume your library.
 
@@ -455,7 +448,7 @@ Run the app and you should see our component being rendered!
 
 That's it! You have now created your own component library.
 
-You've gone from nothing to having to creating a React component library with TypeScript, bundling it with Rollup, hosting it on your own Github repository, and finally publishing it as a NPM package on your repository's packages. You've also learned how to consume your new component library in a real React application.
+You've gone from nothing to having to creating a React component library with TypeScript, bundling it with esbuild, hosting it on your own Github repository, and finally publishing it as a NPM package on your repository's packages. You've also learned how to consume your new component library in a real React application.
 
 In the next post you will learn the following:
 
