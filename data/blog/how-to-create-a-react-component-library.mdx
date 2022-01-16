@@ -17,7 +17,7 @@ All code from this tutorial is available in [this repository](https://github.com
 
 This tutorial will guide you through the process of creating your own custom React component library.
 
-This component library will be written in TypeScript, built using esbuild, and published to npm. At the end of this tutorial, you'll be able to install your libary like this:
+This component library will be written in TypeScript, built using esbuild, and published as a Github package. At the end of this tutorial, you'll be able to install your libary like this:
 
 ```bash
 npm install @your-username/component-library
@@ -72,7 +72,7 @@ Next, let's install install React:
 npm i -D react
 ```
 
-## Creating Your First Component
+## Creating the First Component
 
 Because we're creating a library, we should make it as easy as possible for users of our libary to import what they want. To do this, we will use `index.ts` files to export our components.
 
@@ -258,7 +258,7 @@ The most important changes are:
 - `types` -- path to our TypeScript declarations
 - `scripts` -- scripts that can be run by npm. The `build` script will clean the `dist` folder and build our library.
 
-## Building Our Library
+## Building the Library
 
 Now that everything is in place, we are now ready to run esbuild for the first time. Run the following command:
 
@@ -279,7 +279,7 @@ If everything was configured correctly, esbuild will run without error and you'l
   </figcaption>
 </figure>
 
-## Publishing Your Library
+## Publishing the Library
 
 We've created a component library! Now we need to publish it.
 
@@ -393,11 +393,11 @@ Congratulations! You have now published version 0.0.1 of your React component li
 
 ![dist folder files](/static/images/component-library/github-packages.png)
 
-## Using Your Library
+## Using the Library
 
-Your package is now live, let's use it!
+Our package is now live, let's use it!
 
-Using your library is slightly different than using a normal npm package. Only those who are authorized can download and install your library. Your users will also need a `.npmrc` file. However, you can provide them with an token that has read access.
+Using our library is slightly different than using a normal npm package. Only those who are authorized can download and install your library. Your users will also need a `.npmrc` file. However, you can provide them with an token that has read access.
 
 You can generate a new personal access token with the `read:packages` (not write) scope. Once generated, you can share that token with those that need to consume your library.
 
