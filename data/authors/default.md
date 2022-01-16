@@ -2,6 +2,7 @@
 name: Trevor Hackett
 avatar: /static/images/avatar.png
 occupation: Application Architect
+company: Priority Dispatch
 email: trevorhackett@gmail.com
 twitter: https://twitter.com/fate900
 linkedin: https://www.linkedin.com/in/trevorhackett

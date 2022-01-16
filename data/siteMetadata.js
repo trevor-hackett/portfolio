@@ -4,6 +4,7 @@ const siteMetadata = {
   headerTitle: 'Hackett Blog',
   description: 'A blog created with Next.js and Tailwind.css',
   language: 'en-us',
+  theme: 'system', // system, dark or light
   siteUrl: 'https://hacketts.dev',
   siteRepo: 'https://github.com/yarrgh/portfolio',
   siteLogo: '/static/images/logo.png',

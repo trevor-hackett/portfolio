@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "forceConsistentCasingInFileNames": true,
     "paths": {
       "@/components/*": ["components/*"],
       "@/data/*": ["data/*"],
