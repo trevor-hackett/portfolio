@@ -7,6 +7,7 @@ import {
   Scripts,
   ScrollRestoration,
 } from "@remix-run/react";
+import { Header } from "~/components/header";
 import styles from "./styles/app.css";
 
 export const meta: MetaFunction = () => ({
@@ -17,6 +18,11 @@ export const meta: MetaFunction = () => ({
 
 export function links() {
   return [
+    { rel: "preconnect", href: "https://fonts.googleapis.com" },
+    {
+      rel: "preconnect",
+      href: "https://fonts.gstatic.com",
+    },
     { rel: "stylesheet", href: styles },
     {
       rel: "stylesheet",
@@ -34,6 +40,7 @@ export default function App() {
       </head>
       <body className="bg-white text-neutral-900 dark:bg-neutral-900 dark:text-neutral-50">
         <div className="mx-auto w-11/12 max-w-6xl">
+          <Header />
           <Outlet />
         </div>
         <ScrollRestoration />
