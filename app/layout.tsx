@@ -1,3 +1,4 @@
+import { AnalyticsWrapper } from "@/components/analytics";
 import { Navbar } from "@/components/navbar";
 import { Open_Sans } from "@next/font/google";
 import "./globals.css";
@@ -24,6 +25,7 @@ export default function RootLayout({
           <Navbar />
           <div className="grow flex flex-col justify-center">{children}</div>
         </div>
+        <AnalyticsWrapper />
       </body>
     </html>
   );
