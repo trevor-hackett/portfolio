@@ -1,25 +1,25 @@
-import { Link } from "@remix-run/react";
+import Link from "next/link";
 
-export function Header() {
+export function Navbar() {
   return (
     <header className="flex items-center justify-between py-10">
-      <Link to="/">Logo</Link>
+      <Link href="/">Logo</Link>
       <div className="flex items-center">
         <div className="hidden sm:block">
           <Link
-            to="/blog"
+            href="/blog"
             className="p-1 font-medium text-gray-900 dark:text-gray-100 sm:p-4"
           >
             Blog
           </Link>
           <Link
-            to="/projects"
+            href="/projects"
             className="p-1 font-medium text-gray-900 dark:text-gray-100 sm:p-4"
           >
             Projects
           </Link>
           <Link
-            to="/about"
+            href="/about"
             className="p-1 font-medium text-gray-900 dark:text-gray-100 sm:p-4"
           >
             About
