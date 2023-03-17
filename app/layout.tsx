@@ -1,3 +1,4 @@
+import { Metadata } from 'next'
 import { Montserrat } from 'next/font/google'
 
 import { AnalyticsWrapper } from '@/components/analytics'
@@ -10,6 +11,15 @@ const montserrat = Montserrat({
   display: 'swap',
   variable: '--font-sans',
 })
+
+export const metadata: Metadata = {
+  title: {
+    absolute: 'Trevor Hackett | Software Engineer',
+    default: '#s | Trevor Hackett',
+  },
+  description:
+    'Trevor Hackett is a software engineer based in the United States.',
+}
 
 export default function RootLayout({
   children,
