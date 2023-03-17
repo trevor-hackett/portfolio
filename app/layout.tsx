@@ -1,32 +1,32 @@
-import { AnalyticsWrapper } from "@/components/analytics";
-import { Navbar } from "@/components/navbar";
-import { Open_Sans } from "@next/font/google";
-import "./globals.css";
+import { Montserrat } from 'next/font/google'
 
-const openSans = Open_Sans({
-  subsets: ["latin"],
-  variable: "--font-open-sans",
-});
+import { AnalyticsWrapper } from '@/components/analytics'
+import { Navbar } from '@/components/navbar'
+import { Toaster } from '@/components/ui/toaster'
+import './globals.css'
+
+const montserrat = Montserrat({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-sans',
+})
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={openSans.variable}>
-      {/*
-        <head /> will contain the components returned by the nearest parent
-        head.tsx. Find out more at https://beta.nextjs.org/docs/api-reference/file-conventions/head
-      */}
+    <html lang="en" className={montserrat.variable}>
       <head />
       <body className="bg-white text-neutral-900 dark:bg-neutral-900 dark:text-neutral-50">
-        <div className="mx-auto w-11/12 max-w-6xl min-h-screen flex flex-col">
+        <div className="mx-auto flex min-h-screen w-11/12 max-w-6xl flex-col">
           <Navbar />
-          <div className="grow flex flex-col justify-center">{children}</div>
+          <div className="flex grow flex-col justify-center">{children}</div>
         </div>
         <AnalyticsWrapper />
+        <Toaster />
       </body>
     </html>
-  );
+  )
 }
