@@ -15,7 +15,7 @@ const montserrat = Montserrat({
 export const metadata: Metadata = {
   title: {
     absolute: 'Trevor Hackett | Software Engineer',
-    default: '#s | Trevor Hackett',
+    template: '%s | Trevor Hackett',
   },
   description:
     'Trevor Hackett is a software engineer based in the United States.',
