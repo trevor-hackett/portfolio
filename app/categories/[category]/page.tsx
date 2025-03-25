@@ -8,12 +8,12 @@ import CardBody from '@/components/card-body'
 import CardImage from '@/components/card-image'
 
 interface PostProps {
-  params: {
+  params: Promise<{
     category: string
-  }
+  }>
 }
 
-async function getPostsFromParams(params: PostProps['params']) {
+async function getPostsFromParams(params: Awaited<PostProps['params']>) {
   const category = params?.category
   const posts = allPosts.filter(
     (post) => post.category.toLowerCase() === category.toLowerCase()
@@ -21,13 +21,14 @@ async function getPostsFromParams(params: PostProps['params']) {
   return posts
 }
 
-export async function generateStaticParams(): Promise<PostProps['params'][]> {
+export async function generateStaticParams() {
   return allPosts.filter((post) => ({
     category: post.category,
   }))
 }
 
-export default async function PostPage({ params }: PostProps) {
+export default async function PostPage(props: PostProps) {
+  const params = await props.params
   const posts = await getPostsFromParams(params)
 
   return posts.map((post) => (
